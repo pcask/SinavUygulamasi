@@ -1,0 +1,107 @@
+<html>
+<head>
+    <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+    <div id="container">
+        <div id="content">
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <script src="content/jquery-3.2.1.min.js"></script>
+    <script src="content/jquery.cookie.js"></script>
+
+    <script>
+       
+        var kullanici;
+
+        //Alýnan ÝndexNo ile verileri Getirme
+       
+        var KullaniciIndexNo = getParameterByName('indexNo');
+        if (KullaniciIndexNo == null) {
+            window.location.href = "login.html";
+        }
+            $.ajax({
+                url: 'kullanicilar.js',
+                method: 'Get',
+                dataType: 'JSON',
+                success: function (data) {
+                    kullanici = data[KullaniciIndexNo];
+                    KisiOlustur();
+                }
+            });
+        
+
+        ////Query Stringle ÝndexNo Alma
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+        //Element Oluþturma
+
+        function KisiOlustur() {
+            var elementMetni = '<div class="kutu">';
+            elementMetni += '<div class="baslik"><h2>' + kullanici.isim + '</h2></div>';
+            elementMetni += '<div class="govde"><div class="image"><img src="/content/img/' + kullanici.profil_resmi + '"/></div>';
+            elementMetni += '<div class="info">';
+            elementMetni += '<span class="bilgi">Doðum Tarihi: ' + kullanici.d_tarihi + '</span></br>';
+            elementMetni += '<span class="bilgi">Okul: ' + kullanici.mezun_oldgu_okul + '</span></br>';
+            elementMetni += '<span class="bilgi">Fakülte: ' + kullanici.fakulte + '</span></br>';
+            elementMetni += '<br />';
+            elementMetni += '</div></div>';
+            elementMetni += '<div id="ozgecmis" onclick="GizleGoster()"><h3>Özgeçmiþ</h3><p>' + kullanici.ozgecmis + '</p></div>';
+            elementMetni += '<div id="konular" onclick="GizleGoster2()"><h3>Konular</h3><ul>';
+            for (var i = 0; i < kullanici.konular.length; i++) {
+                elementMetni += '<li>' + kullanici.konular[i] + '</li>';
+            }
+
+            elementMetni += '</ul>';
+            elementMetni += '</div>';
+            //var element = document.createElement(elementMetni);
+            //$(element).find('#ozgecmis').bind('click', GizleGoster(this));
+            $('#content').append(elementMetni);
+
+        }
+        //$("#ozgecmis").click(function () {
+        //    $("#ozgecmis >p").toggle("slow");
+        //})
+
+        //$('#ozgecmis').click(function () {
+        //    if ($('#ozgecmis > p').is(":visible")) {
+        //        $('#ozgecmis > p').hide();
+        //    } else {
+        //        $('#ozgecmis > p').show();
+        //    }
+        //});
+
+        function GizleGoster() {
+            if ($('#ozgecmis > p').is(":visible")) {
+                $('#ozgecmis > p').hide();
+            } else {
+                $('#ozgecmis > p').show();
+            }
+        }
+        function GizleGoster2() {
+            if ($('#konular > ul').is(":visible")) {
+                $('#konular > ul').hide();
+            } else {
+                $('#konular > ul').show();
+            }
+        }
+
+    </script>
+</body>
+</html>

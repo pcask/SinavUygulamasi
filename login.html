@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <div id="login">
+        <label>Kullanıcı Adı:</label><br /><br />
+        <input type="text" id="k_adi" /><br /><br />
+        <label>Şifre:</label><br /><br />
+
+        <input type="text" id="sifre" /><br /><br />
+
+
+        <input type="checkbox" id="beni_hatirla" /><label for="beni_hatirla">Beni Hatırla</label><br /><br />
+       
+        <input type="button" id="giris_yap" value="Giriş Yap" />
+
+        <div id="mesaj"></div>
+    </div>
+    <div id="hosGeldiniz"></div>
+    <script src="content/jquery-1.10.2.min.js"></script>
+    <script src="content/jquery.cookie.js"></script>
+
+    <script>
+
+
+
+        function Sayac(saniye) {
+            var toplamSaniye = saniye;
+            var interval;
+            _this = this;
+            _this.YazilacakYer = '';
+            _this.BittigindeCalis = function () { };
+            _this.Basla = function () {
+                $('#mesaj').fadeIn()
+                interval = setInterval(function () {
+                    toplamSaniye--;
+                    $.cookie("kalanSure", toplamSaniye, { expires: 10 });
+
+                    var dakika = Math.floor((toplamSaniye % 3600) / 60);
+                    var saniye = Math.floor((toplamSaniye % 3600) % 60)
+
+                    $(_this.YazilacakYer).text(normalize(dakika) + ':' + normalize(saniye));
+
+                    if (toplamSaniye < 1) {
+                        $('#mesaj').fadeOut('slow')
+                        _this.Bitir();
+                        _this.BittigindeCalis();
+                    }
+
+                }, 100);
+            }
+
+            _this.Bitir = function () {
+                clearInterval(interval);
+            }
+
+            function normalize(deger) {
+                return deger < 10 ? "0" + deger : deger;
+            }
+        }
+        var sayac;
+
+        function sayaciBaslat() {
+            $('#mesaj').text('05:00');
+            sayac = new Sayac(kalanSure);
+            sayac.YazilacakYer = '#mesaj';
+            sayac.BittigindeCalis = cezayiBitir;
+            sayac.Basla();
+            
+        }
+        function cezayiBitir() {
+            $.cookie("cezaDevamEdiyorMu", "false");
+
+
+            if (sayac) {
+                sayac.Bitir();
+            }
+
+            $('#giris_yap').removeAttr("disabled");
+            $('#mesaj').attr('display','none')
+            girisSayisi = 0;
+
+           
+        
+        }
+
+        $('#giris_yap').bind('click', function () {
+
+            var kullaniciAdi = $('#k_adi').val();
+            var sifre = $('#sifre').val();
+            var GirisBasarili = false;
+            $.ajax({
+                url: 'kullanicilar.js',
+                method: 'Get',
+                dataType: 'JSON',
+                success: function (data) {
+                    var kullanicilar = data;
+                    for (var j = 0; j < kullanicilar.length; j++) {
+                        var kullanici = kullanicilar[j];
+                        if (kullanici.kullanici_adi == kullaniciAdi && kullanici.sifre == sifre) {
+
+                            window.location = "index.html?indexNo=" + j;
+                            GirisBasarili = true;
+                            girisSayisi = 0;
+                            $.cookie('sayac', girisSayisi)
+                            $.cookie("cezaDevamEdiyorMu", "false");
+                        }
+
+                    }
+                    if (!GirisBasarili) {
+
+                        alert('Kullanıcı Adı veya şifre Yanlış');
+                        girisSayisi++;
+                        if (girisSayisi == 5) {
+                            $('#giris_yap').attr("disabled", "disabled");
+                            cezaDevamEdiyorMu = true;
+                            $.cookie("cezaDevamEdiyorMu", "true", { expires: 10 });
+                            sayaciBaslat();
+                        }
+                        $.cookie("sayac", girisSayisi);
+                    }
+                }
+            })
+        });
+
+        if ($.cookie("cezaDevamEdiyorMu") === undefined) {
+            var girisSayisi = 0;
+            kalanSure = 300;
+            $('#mesaj').attr('display','none');
+           
+        } else if ($.cookie("cezaDevamEdiyorMu") === "true") {
+            kalanSure = parseInt($.cookie("kalanSure"));
+            girisSayisi = parseInt($.cookie("sayac"));
+
+            $('#giris_yap').attr('disabled', 'disabled');
+            $('#mesaj').attr('display','block');
+
+     
+            sayaciBaslat();
+     
+        } else {
+            kalanSure = 300;
+            $('#giris_yap').removeAttr('disabled');
+            $('#mesaj').attr('display', 'none')
+           
+            cezayiBitir();
+           
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //if ($.cookie("sayac") == undefined) {
+        //    var girisSayisi = 0;
+        //    var sinavSuresi = 300;
+        //    $.cookie("sayac", girisSayisi,{ expires: 7 });
+        //} else {
+        //    kalansure = parseInt($.cookie("kalanSure"));
+        //    if (kalanSure >= 0)
+        //    { $.cookie("kalanSure", 300) }
+        //     $('#giris_yap').removeAttr("disabled");
+        //     sayaciBaslat();
+        // girisSayisi=parseInt($.cookie("sayac"));
+        //}
+      
+
+
+        //$('#giris_yap').bind('click', function () {
+
+        //    var kullaniciAdi = $('#k_adi').val();
+        //    var sifre = $('#sifre').val();
+        //    var GirisBasarili = false;
+        //    $.ajax({
+        //        url: 'kullanicilar.js',
+        //        method: 'Get',
+        //        dataType: 'JSON',
+        //        success: function (data) {
+        //            var kullanicilar = data;
+        //            for (var j = 0; j < kullanicilar.length; j++) {
+        //                var kullanici = kullanicilar[j];
+        //                if (kullanici.kullanici_adi == kullaniciAdi && kullanici.sifre == sifre) {
+
+        //                    window.location = "index.html?indexNo=" + j;
+        //                    GirisBasarili = true;
+        //                    girisSayisi = 0;
+        //                }
+
+        //            }
+        //            if (!GirisBasarili) {
+
+        //                alert('kullanıcı Adı veya şifre Yanlış')
+        //                girisSayisi++;
+        //                if (girisSayisi == 5) {
+        //                    $('#giris_yap').attr("disabled", "disabled")
+        //                    sayaciBaslat()
+        //                }
+        //                $.cookie("sayac", girisSayisi);
+        //            }
+
+
+        //        }
+        //    })
+        //});
+        //var sayac
+        //function Sayac(saniye) {
+        //    var toplamSaniye = saniye;
+        //    var interval;
+        //    _this = this;
+        //    _this.YazilacakYer = '';
+        //    _this.BittigindeCalis = function () { };
+        //    _this.Basla = function () {
+        //        interval = setInterval(function () {
+        //            toplamSaniye--;
+        //            $.cookie("kalanSure", toplamSaniye, { expires: 10 });
+
+        //            var dakika = Math.floor((toplamSaniye % 3600) / 60);
+        //            var saniye = Math.floor((toplamSaniye % 3600) % 60)
+
+        //            $(_this.YazilacakYer).text(normalize(dakika) + ':' + normalize(saniye));
+
+        //            if (toplamSaniye < 1) {
+        //                _this.Bitir();
+        //                _this.BittigindeCalis();
+        //            }
+
+        //        }, 20);
+        //    }
+
+        //    _this.Bitir = function () {
+        //        clearInterval(interval);
+        //    }
+        //}
+        //function normalize(deger) {
+        //    return deger < 10 ? "0" + deger : deger;
+        //}
+        //function sayaciBaslat() {
+        //    $('#mesaj').text('05:00');
+        //    sayac = new Sayac(kalansure);
+        //    sayac.YazilacakYer = '#mesaj';
+        //    sayac.BittigindeCalis = CezayiBitir;
+        //    sayac.Basla();
+        //}
+        //function CezayiBitir() {
+        //    $.cookie("sayac", 0);
+        //    girisSayisi = 0;
+
+        //    if (sayac) {
+        //        sayac.Bitir();
+        //    }
+
+        //    $('#giris_yap').removeAttr("disabled");
+        //    $('#mesaj').fadeOut('slow')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //}
+
+        //          $.cookie("login", $('#k_adi').val(), { expires: 2 });        $('.urunler').html('');
+
+        //                for (var j = 0; j < urunler.length; j++) {
+        //                    var urun = urunler[j];
+
+        //                    var divHtml = '<div class="urun">'
+        //                    divHtml += '<div class="resimDiv" > <img src="' + urun.ResimYolu + '" alt="birinci ürün resmi" /></div>';
+        //                    divHtml += '<h3>' + urun.Isim + '</h3>';
+        //                    divHtml += '<div class="aciklama"> <p>' + urun.Aciklama + '</p></div >';
+        //                    divHtml += '<input type="button" name="ekle" class="ekle" value="Sepete Ekle" />';
+        //                    divHtml += '<strong>' + urun.Fiyat + '</strong> <strong> TL</strong>';
+        //                    divHtml += '</div> ';
+
+        //                    $('.urunler').append(divHtml);
+        //                }
+        //                ClickleriBagal();
+        //            }
+        //        });
+
+
+
+
+
+
+
+
+
+        //if ($.cookie("login")) {
+        //    window.location.href = "index.html";
+        //}
+
+        //$('#giris_yap').bind('click', function () {
+
+        //    var kullanicilar = JSON.parse($.cookie("kullanicilar") || "[]");
+        //    var kullaniciVar = 0;
+
+        //    for (var i = 0; i < kullanicilar.length; i++) {
+        //        var k = kullanicilar[i];
+        //        if (k.k_adi === $('#k_adi').val() && k.sifre === $('#sifre').val() && k.aktifMi) {
+        //            if ($('#beni_hatirla').prop('checked')) {
+        //                $.cookie("login", $('#k_adi').val(), { expires: 2 });
+        //            } else {
+        //                $.cookie("login", $('#k_adi').val());
+        //            }
+        //            window.location.href = "/login.html";
+        //        } else if (k.k_adi === $('#k_adi').val() && k.sifre === $('#sifre').val() && !k.aktifMi) {
+        //            $('#mesaj').text('Kullanıcınız aktif değil!');
+        //            kullaniciVar = 1;
+        //            break;
+        //        }
+        //    }
+
+        //    if (kullaniciVar === 0) {
+        //        $('#mesaj').text('Böyle bir kullanıcı yok!');
+
+        //    }
+        //});
+
+    </script>
+</body>
+</html>
